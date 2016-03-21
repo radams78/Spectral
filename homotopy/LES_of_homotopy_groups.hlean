@@ -324,7 +324,7 @@ namespace chain_complex
   | (k+3) :=
     begin
       refine fiber_sequence_carrier_pequiv f k ⬝e* _,
-      apply loop_space_pequiv,
+      apply loop_pequiv_loop,
       exact fiber_sequence_pequiv_homotopy_groups k
     end
 
@@ -651,32 +651,32 @@ namespace chain_complex
       -- uncomment the next two lines to have prettier subgoals
       -- esimp, replace (succ 5 * (n + 1) + 0) with (6*n+3+3),
       -- rewrite [+homotopy_groups_add3, homotopy_groups2_add1],
-      apply loop_space_pequiv, apply loop_space_pequiv,
+      apply loop_pequiv_loop, apply loop_pequiv_loop,
       rexact homotopy_groups2_pequiv' n (fin.mk 0 H)
     end
   | (n+1) (fin.mk 1 H)     :=
     begin
-      apply loop_space_pequiv, apply loop_space_pequiv,
+      apply loop_pequiv_loop, apply loop_pequiv_loop,
       rexact homotopy_groups2_pequiv' n (fin.mk 1 H)
     end
   | (n+1) (fin.mk 2 H)     :=
     begin
-      apply loop_space_pequiv, apply loop_space_pequiv,
+      apply loop_pequiv_loop, apply loop_pequiv_loop,
       rexact homotopy_groups2_pequiv' n (fin.mk 2 H)
     end
   | (n+1) (fin.mk 3 H)     :=
     begin
-      apply loop_space_pequiv, apply loop_space_pequiv,
+      apply loop_pequiv_loop, apply loop_pequiv_loop,
       rexact homotopy_groups2_pequiv' n (fin.mk 3 H)
     end
   | (n+1) (fin.mk 4 H)     :=
     begin
-      apply loop_space_pequiv, apply loop_space_pequiv,
+      apply loop_pequiv_loop, apply loop_pequiv_loop,
       rexact homotopy_groups2_pequiv' n (fin.mk 4 H)
     end
   | (n+1) (fin.mk 5 H)     :=
     begin
-      apply loop_space_pequiv, apply loop_space_pequiv,
+      apply loop_pequiv_loop, apply loop_pequiv_loop,
       rexact homotopy_groups2_pequiv' n (fin.mk 5 H)
     end
   | n     (fin.mk (k+6) H) := begin exfalso, apply lt_le_antisymm H, apply le_add_left end
@@ -685,6 +685,7 @@ namespace chain_complex
     homotopy_groups f (nat_of_str x) ≃* homotopy_groups2 x
   | (n, x) := homotopy_groups2_pequiv' n x
 
+  local attribute loop_pequiv_loop [reducible]
   /- all cases where n>0 are basically the same -/
   definition homotopy_groups_fun2_phomotopy (x : +6ℕ) :
     homotopy_groups2_pequiv x ∘* homotopy_groups_fun f (nat_of_str x) ~*
@@ -744,9 +745,9 @@ namespace chain_complex
       induction n with n IH,
       { refine !pid_comp ⬝* _ ⬝* !comp_pid⁻¹*,
         refine !comp_pid⁻¹* ⬝* pconcat2 _ _,
-        { exact !comp_pid⁻¹*},
-        { refine cast (ap (λx, _ ~* loop_space_pequiv x) !loop_space_pequiv_rfl)⁻¹ _,
-          refine cast (ap (λx, _ ~* x) !loop_space_pequiv_rfl)⁻¹ _, reflexivity}},
+        { exact (comp_pid (ap1 (boundary_map f) ∘* pinverse))⁻¹*},
+        { refine cast (ap (λx, _ ~* loop_pequiv_loop x) !loop_pequiv_loop_rfl)⁻¹ _,
+          refine cast (ap (λx, _ ~* x) !loop_pequiv_loop_rfl)⁻¹ _, reflexivity}},
       { refine _ ⬝* !comp_pid⁻¹*,
         refine _ ⬝* pwhisker_right _ (!homotopy_groups_fun2_add1_5)⁻¹*,
         refine !ap1_compose⁻¹* ⬝* _ ⬝* !ap1_compose, apply ap1_phomotopy,

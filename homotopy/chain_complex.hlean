@@ -5,7 +5,7 @@ Authors: Floris van Doorn
 
 -/
 
-import types.int types.pointed2 types.trunc algebra.hott ..group_theory.basic .fin
+import types.int types.pointed types.trunc algebra.hott ..group_theory.basic .fin
 
 open eq pointed int unit is_equiv equiv is_trunc trunc function algebra group sigma.ops
      sum prod nat bool fin
