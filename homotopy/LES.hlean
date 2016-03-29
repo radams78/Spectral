@@ -49,7 +49,7 @@ namespace chain_complex'
     refine _ ⬝* !ap1_compose⁻¹*,
     exact pwhisker_left _ !pcast_ap_loop_space,
   end
-
+exit
   definition nat_of_str_3S [unfold 2] [reducible]
     : Π(x : stratified +ℕ 2), nat_of_str x + 1 = nat_of_str (@S (stratified +ℕ 2) x)
   | (n, fin.mk 0 H) := by reflexivity
@@ -58,7 +58,7 @@ namespace chain_complex'
   | (n, fin.mk (k+3) H) := begin exfalso, apply lt_le_antisymm H, apply le_add_left end
 
   definition homotopy_groups2_pequiv : Π(x : +3ℕ),
-    homotopy_groups f (nat_of_str x) ≃* homotopy_groups2 x
+    homotopy_groups (nat_of_str x) ≃* homotopy_groups2 x
   |  (0,    (fin.mk 0 H))     := by reflexivity
   |  (0,    (fin.mk 1 H))     := by reflexivity
   |  (0,    (fin.mk 2 H))     := by reflexivity
@@ -85,7 +85,7 @@ namespace chain_complex'
 
   /- all cases where n>0 are basically the same -/
   definition homotopy_groups_fun2_phomotopy (x : +6ℕ) :
-    homotopy_groups2_pequiv x ∘* homotopy_groups_fun f (nat_of_str x) ~*
+    homotopy_groups2_pequiv x ∘* homotopy_groups_fun (nat_of_str x) ~*
       (homotopy_groups_fun2 x ∘* homotopy_groups2_pequiv (S x))
     ∘* pcast (ap (homotopy_groups f) (nat_of_str_6S x)) :=
   begin
