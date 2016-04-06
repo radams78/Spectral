@@ -53,6 +53,14 @@ section MOVE
     { reflexivity}
   end
 
+  definition to_pmap_pequiv_of_pmap {A B : Type*} (f : A →* B) (H : is_equiv f)
+    : pequiv.to_pmap (pequiv_of_pmap f H) = f :=
+  by cases f; reflexivity
+
+  definition to_pmap_pequiv_trans {A B C : Type*} (f : A ≃* B) (g : B ≃* C)
+    : pequiv.to_pmap (f ⬝e* g) = g ∘* f :=
+  !to_pmap_pequiv_of_pmap
+
   definition pequiv_pinverse (A : Type*) : Ω A ≃* Ω A :=
   pequiv_of_pmap pinverse !is_equiv_eq_inverse
 
@@ -310,103 +318,49 @@ namespace chain_complex
     apply pid_comp
   end
 
-  theorem fiber_sequence_phomotopy_loop_spaces_helper1 (n : ℕ) :
-    fiber_sequence_pequiv_loop_spaces n ∘* fiber_sequence_fun n ~*
-      loop_spaces_fun n ∘* fiber_sequence_pequiv_loop_spaces (n + 1) →
-    fiber_sequence_pequiv_loop_spaces (n + 3) ∘* fiber_sequence_fun (n + 3) ~*
-      (loop_spaces_fun (n + 3) ∘* pinverse) ∘* fiber_sequence_pequiv_loop_spaces (n + 4) :=
-  begin
-    intro IH,
-    replace (n + 4) with (n + 1 + 3),
-    rewrite [fiber_sequence_pequiv_loop_spaces_add3 n,
-             fiber_sequence_pequiv_loop_spaces_add3 (n+1)],
-    refine !passoc ⬝* _,
-    refine pwhisker_left _ (fiber_sequence_fun_phomotopy n) ⬝* _,
-    refine !passoc⁻¹* ⬝* _ ⬝* !passoc,
-    apply pwhisker_right,
-    rewrite [loop_spaces_fun_add3],
-    refine _ ⬝* !passoc⁻¹*,
-    refine _ ⬝* pwhisker_left _ !ap1_compose_pinverse,
-    refine !passoc⁻¹* ⬝* _ ⬝* !passoc,
-    apply pwhisker_right,
-    refine !ap1_compose⁻¹* ⬝* _ ⬝* !ap1_compose,
-    apply ap1_phomotopy,
-    exact IH
-  end
-
-  -- theorem fiber_sequence_phomotopy_loop_spaces_helper2 (n : ℕ) :
-  --   fiber_sequence_pequiv_loop_spaces (n + 2) ∘* fiber_sequence_fun (n + 2) ~*
-  --     (loop_spaces_fun (n + 2) ∘* pinverse) ∘* fiber_sequence_pequiv_loop_spaces (n + 3) →
-  --   fiber_sequence_pequiv_loop_spaces (n + 5) ∘* fiber_sequence_fun (n + 5) ~*
-  --     loop_spaces_fun (n + 5) ∘* fiber_sequence_pequiv_loop_spaces (n + 6) :=
-  -- begin
-  --   intro IH,
-  --   replace (n + 5) with (n + 2 + 3),
-  --   replace (n + 6) with (n + 3 + 3),
-  --   rewrite [fiber_sequence_pequiv_loop_spaces_add3 (n+2),
-  --            fiber_sequence_pequiv_loop_spaces_add3 (n+3)],
-  --   refine !passoc ⬝* _,
-  --   refine pwhisker_left _ (fiber_sequence_fun_phomotopy (n+2)) ⬝* _,
-  --   refine !passoc⁻¹* ⬝* _ ⬝* !passoc,
-  --   apply pwhisker_right,
-  --   rewrite [loop_spaces_fun_add3],
-  --   refine !passoc⁻¹* ⬝* _,
-  --   refine pwhisker_right _ !ap1_compose⁻¹* ⬝* _,
-  --   refine pwhisker_right _ (ap1_phomotopy IH) ⬝* _,
-  --   refine pwhisker_right _ !ap1_compose ⬝* _,
-  --   refine pwhisker_right _ (pwhisker_right _ !ap1_compose) ⬝* _,
-  --   refine !passoc ⬝* !passoc ⬝* _,
-  --   apply pwhisker_left,
-  --   refine pwhisker_left _ !ap1_compose_pinverse ⬝* _,
-  --   refine !passoc⁻¹* ⬝* _ ⬝* !pid_comp,
-  --   apply pwhisker_right,
-  --   refine pwhisker_right _ !ap1_pinverse ⬝* _,
-  --   apply pinverse_pinverse
-  -- end
-
   definition pid_or_pinverse : Π(n : ℕ), loop_spaces n ≃* loop_spaces n
   | 0     := pequiv.rfl
   | 1     := pequiv.rfl
   | 2     := pequiv.rfl
-  | (k+3) := loop_pequiv_loop (pid_or_pinverse k) ⬝e* !pequiv_pinverse
+  | 3     := pequiv.rfl
+  | (k+4) := !pequiv_pinverse ⬝e* loop_pequiv_loop (pid_or_pinverse (k+1))
+
+  definition pid_or_pinverse_add4 (n : ℕ)
+    : pid_or_pinverse (n + 4) = !pequiv_pinverse ⬝e* loop_pequiv_loop (pid_or_pinverse (n + 1)) :=
+  by reflexivity
 
   theorem fiber_sequence_phomotopy_loop_spaces : Π(n : ℕ),
     fiber_sequence_pequiv_loop_spaces n ∘* fiber_sequence_fun n ~*
-      loop_spaces_fun n ∘* fiber_sequence_pequiv_loop_spaces (n + 1) ⊎
-    fiber_sequence_pequiv_loop_spaces n ∘* fiber_sequence_fun n ~*
       (loop_spaces_fun n ∘* pid_or_pinverse (n + 1)) ∘* fiber_sequence_pequiv_loop_spaces (n + 1)
-  | 0     := by apply inl; reflexivity
-  | 1     := by apply inl; reflexivity
+  | 0     := proof proof phomotopy.rfl qed ⬝* pwhisker_right _ !comp_pid⁻¹* qed
+  | 1     := by reflexivity
   | 2     :=
     begin
-      apply inl,
       refine !pid_comp ⬝* _,
       replace loop_spaces_fun 2 with boundary_map,
       refine _ ⬝* pwhisker_left _ fiber_sequence_pequiv_loop_spaces_3_phomotopy⁻¹*,
       apply phomotopy_of_pinv_right_phomotopy,
-      reflexivity
+      exact !pid_comp⁻¹*
     end
   | (k+3) :=
     begin
-      cases (fiber_sequence_phomotopy_loop_spaces k) with H H,
-      { apply inr, apply chain_complex.fiber_sequence_phomotopy_loop_spaces_helper1 f k, exact H},
-      { revert H, match k with
-        | 0 :=
-          begin
-            intro H, apply inr, apply chain_complex.fiber_sequence_phomotopy_loop_spaces_helper1 f,
-            refine H ⬝* _, apply pwhisker_right, apply comp_pid
-          end
-        | 1 :=
-          begin
-            intro H, apply inr, apply chain_complex.fiber_sequence_phomotopy_loop_spaces_helper1 f,
-            refine H ⬝* _, apply pwhisker_right, apply comp_pid
-          end
-        | (l+2) :=
-          begin
-            intro H, apply inl, apply chain_complex.fiber_sequence_phomotopy_loop_spaces_helper2 f,
-            exact H
-          end
-        end }
+      replace (k + 3 + 1) with (k + 1 + 3),
+      rewrite [fiber_sequence_pequiv_loop_spaces_add3 k,
+               fiber_sequence_pequiv_loop_spaces_add3 (k+1)],
+      refine !passoc ⬝* _,
+      refine pwhisker_left _ (fiber_sequence_fun_phomotopy k) ⬝* _,
+      refine !passoc⁻¹* ⬝* _ ⬝* !passoc,
+      apply pwhisker_right,
+      replace (k + 1 + 3) with (k + 4),
+      xrewrite [loop_spaces_fun_add3, pid_or_pinverse_add4, to_pmap_pequiv_trans],
+      refine _ ⬝* !passoc⁻¹*,
+      refine _ ⬝* pwhisker_left _ !passoc⁻¹*,
+      refine _ ⬝* pwhisker_left _ (pwhisker_left _ !ap1_compose_pinverse),
+      refine !passoc⁻¹* ⬝* _ ⬝* !passoc ⬝* !passoc,
+      apply pwhisker_right,
+      refine !ap1_compose⁻¹* ⬝* _ ⬝* !ap1_compose ⬝* pwhisker_right _ !ap1_compose,
+      apply ap1_phomotopy,
+      exact fiber_sequence_phomotopy_loop_spaces k
     end
 
   definition LES_of_loop_spaces [constructor] : type_chain_complex +ℕ :=
@@ -424,7 +378,7 @@ namespace chain_complex
   end
 
   open prod succ_str fin
-exit
+
   /--------------
       PART 3
    --------------/

@@ -158,37 +158,38 @@ namespace chain_complex
     apply right_inv
   end
 
-  -- a version of transfer, where you can insert pointed automorphisms in the chain
-  definition transfer_type_chain_complex_aut [constructor]
-    {Y : N → Type*} (g : Π{n : N}, Y (S n) →* Y n) (e : Π{n}, X n ≃* Y n)
-    (p : Π{n} (x : X (S n)), e (tcc_to_fn X n x) = g (e x)) : type_chain_complex N :=
-  type_chain_complex.mk Y @g
-    abstract begin
-      intro n, apply equiv_rect (equiv_of_pequiv e), intro x,
-      refine ap g (p x)⁻¹ ⬝ _,
-      refine (p _)⁻¹ ⬝ _,
-      refine ap e (tcc_is_chain_complex X n _) ⬝ _,
-      apply respect_pt
-    end end
+  -- -- a version of transfer, where you can insert pointed automorphisms in the chain
+  -- definition transfer_type_chain_complex_aut [constructor]
+  --   {Y : N → Type*} (g : Π{n : N}, Y (S n) →* Y n) (e : Π{n}, X n ≃* Y n)
+  --   (h : Π{n : N}, Y n ≃* Y n)
+  --   (p : Π{n} (x : X (S n)), e (tcc_to_fn X n x) = g (h (e x))) : type_chain_complex N :=
+  -- type_chain_complex.mk Y @g
+  --   abstract begin
+  --     intro n, apply equiv_rect (equiv_of_pequiv e), intro x,
+  --     refine ap g (p x)⁻¹ ⬝ _,
+  --     refine (p _)⁻¹ ⬝ _,
+  --     refine ap e (tcc_is_chain_complex X n _) ⬝ _,
+  --     apply respect_pt
+  --   end end
 
-  theorem is_exact_at_t_transfer_aut {X : type_chain_complex N} {Y : N → Type*}
-    {g : Π{n : N}, Y (S n) →* Y n} (e : Π{n}, X n ≃* Y n)
-    (p : Π{n} (x : X (S n)), e (tcc_to_fn X n x) = g (e x)) {n : N}
-    (H : is_exact_at_t X n) : is_exact_at_t (transfer_type_chain_complex X @g @e @p) n :=
-  begin
-    intro y q, esimp at *,
-    have H2 : tcc_to_fn X n (e⁻¹ᵉ* y) = pt,
-    begin
-      refine (inv_commute (λn, equiv_of_pequiv e) _ _ @p _)⁻¹ᵖ ⬝ _,
-      refine ap _ q ⬝ _,
-      exact respect_pt e⁻¹ᵉ*
-    end,
-    cases (H _ H2) with x r,
-    refine fiber.mk (e x) _,
-    refine (p x)⁻¹ ⬝ _,
-    refine ap e r ⬝ _,
-    apply right_inv
-  end
+  -- theorem is_exact_at_t_transfer_aut {X : type_chain_complex N} {Y : N → Type*}
+  --   {g : Π{n : N}, Y (S n) →* Y n} (e : Π{n}, X n ≃* Y n)
+  --   (p : Π{n} (x : X (S n)), e (tcc_to_fn X n x) = g (e x)) {n : N}
+  --   (H : is_exact_at_t X n) : is_exact_at_t (transfer_type_chain_complex X @g @e @p) n :=
+  -- begin
+  --   intro y q, esimp at *,
+  --   have H2 : tcc_to_fn X n (e⁻¹ᵉ* y) = pt,
+  --   begin
+  --     refine (inv_commute (λn, equiv_of_pequiv e) _ _ @p _)⁻¹ᵖ ⬝ _,
+  --     refine ap _ q ⬝ _,
+  --     exact respect_pt e⁻¹ᵉ*
+  --   end,
+  --   cases (H _ H2) with x r,
+  --   refine fiber.mk (e x) _,
+  --   refine (p x)⁻¹ ⬝ _,
+  --   refine ap e r ⬝ _,
+  --   apply right_inv
+  -- end
 
 
   -- move to init.equiv. This is inv_commute for A ≡ unit
