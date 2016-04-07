@@ -3,38 +3,8 @@ Copyright (c) 2016 Floris van Doorn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Floris van Doorn
 
-We define the fiber sequence of a pointed map f : X →* Y. We follow the proof in section 8.4 of
-the book closely. First we define a sequence fiber_sequence as in Definition 8.4.3.
-It has types X(n) : Type*
-X(0)   := Y,
-X(1)   := X,
-X(n+1) := pfiber (f(n))
-with functions f(n) : X(n+1) →* X(n)
-f(0)   := f
-f(n+1) := ppoint f(n)
-We prove that this is an exact sequence.
-Then we prove Lemma 8.4.3, by showing that X(n+3) ≃* Ω(X(n)) and that this equivalence sends
-the map f(n+3) to -Ω(f(n)), i.e. the composition of Ω(f(n)) with path inversion.
-This is the hardest part of this formalization, because we need to show that they are the same
-as pointed maps (we define a pointed homotopy between them).
-
-Using this equivalence we get a boundary_map : Ω(Y) → pfiber f and we can define a new
-fiber sequence X'(n) : Type*
-X'(0)   := Y,
-X'(1)   := X,
-X'(2)   := pfiber f
-X'(n+3) := Ω(X'(n))
-and maps f'(n) : X'(n+1) →* X'(n)
-f'(0) := f
-f'(1) := ppoint f
-f'(2) := boundary_map f
-f'(3) := -Ω(f)
-f'(4) := -Ω(ppoint f)
-f'(5) := -Ω(boundary_map f)
-f'(n+6) := Ω²(f'(n))
-
-We can show that these sequences are equivalent, hence the sequence (X',f') is an exact
-sequence. Now we get the fiber sequence by taking the set-truncation of this sequence.
+The old formalization of the LES of homotopy groups, where all the odd levels have a composition
+  with negation
 -/
 
 import .chain_complex algebra.homotopy_group

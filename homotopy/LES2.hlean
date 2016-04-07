@@ -4,39 +4,73 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Floris van Doorn
 
 We define the fiber sequence of a pointed map f : X →* Y. We mostly follow the proof in section 8.4
-of the book. First we define a sequence fiber_sequence as in Definition 8.4.3.
+of the book.
+
+PART 1:
+We define a sequence fiber_sequence as in Definition 8.4.3.
 It has types X(n) : Type*
 X(0)   := Y,
 X(1)   := X,
-X(n+1) := pfiber (f(n))
+X(n+1) := fiber (f(n))
 with functions f(n) : X(n+1) →* X(n)
 f(0)   := f
-f(n+1) := ppoint f(n)
+f(n+1) := point (f(n)) [this is the first projection]
 We prove that this is an exact sequence.
 Then we prove Lemma 8.4.3, by showing that X(n+3) ≃* Ω(X(n)) and that this equivalence sends
 the pointed map f(n+3) to -Ω(f(n)), i.e. the composition of Ω(f(n)) with path inversion.
+Using this equivalence we get a boundary_map : Ω(Y) → pfiber f.
 
-Using this equivalence we get a boundary_map : Ω(Y) → pfiber f. Now we can define a new
-fiber sequence X'(n) : Type*, and here we slightly diverge from the book. We define it as
+PART 2:
+Now we can define a new fiber sequence X'(n) : Type*, and here we slightly diverge from the book.
+We define it as
 X'(0)   := Y,
 X'(1)   := X,
-X'(2)   := pfiber f
+X'(2)   := fiber f
 X'(n+3) := Ω(X'(n))
 with maps f'(n) : X'(n+1) →* X'(n)
 f'(0) := f
-f'(1) := ppoint f
-f'(2) := boundary_map f
+f'(1) := point f
+f'(2) := boundary_map
 f'(n+3) := Ω(f'(n))
 
-We can show that these sequences are equivalent, up to sign, hence the sequence (X',f') is an exact
-sequence. Now we get the fiber sequence by taking the set-truncation of this sequence.
+This sequence is not equivalent to the previous sequence. The difference is in the signs.
+The sequence f has negative signs (i.e. is composed with the inverse maps) for n ≡ 3, 4, 5 mod 6.
+This sign information is captured by e : X'(n) ≃* X'(n) such that
+e(k)   := 1               for k = 0,1,2,3
+e(k+3) := Ω(e(k)) ∘ (-)⁻¹ for k > 0
 
-In the book the odd levels
+Now the sequence (X', f' ∘ e) is equivalent to (X, f), Hence (X', f' ∘ e) is an exact sequence.
+We then prove that (X', f') is an exact sequence by using that there are other equivalences
+eₗ and eᵣ such that
+f' = eᵣ ∘ f' ∘ e
+f' ∘ eₗ = e ∘ f'.
+(this fact is type_chain_complex_cancel_aut and is_exact_at_t_cancel_aut in the file chain_complex)
+eₗ and eᵣ are almost the same as e, except that the places where the inverse is taken is
+slightly shifted:
+eᵣ = (-)⁻¹ for n ≡ 3, 4, 5 mod 6                       and eᵣ = 1 otherwise
+e  = (-)⁻¹ for n ≡ 4, 5, 6 mod 6 (except for n = 0)    and e  = 1 otherwise
+eₗ = (-)⁻¹ for n ≡ 5, 6, 7 mod 6 (except for n = 0, 1) and eₗ = 1 otherwise
 
 PART 3:
+We change the type over which the sequence of types and maps are indexed from ℕ to ℕ × 3
+(where 3 is the finite type with 3 elements). The reason is that we have that X'(3n) = Ωⁿ(Y), but
+this equality is not definitionally true. Hence we cannot even state whether f'(3n) = Ωⁿ(f) without
+using transports. This gets ugly. However, if we use as index type ℕ × 3, we can do this. We can
+define
+Y : ℕ × 3 → Type* as
+Y(n, 0) := Ωⁿ(Y)
+Y(n, 1) := Ωⁿ(X)
+Y(n, 2) := Ωⁿ(fiber f)
+with maps g(n) : Y(S n) →* Y(n) (where the successor is defined in the obvious way)
+g(n, 0) := Ωⁿ(f)
+g(n, 1) := Ωⁿ(point f)
+g(n, 2) := Ωⁿ(boundary_map) ∘ cast
 
-Part 4:
+Here "cast" is the transport over the equality Ωⁿ⁺¹(Y) = Ωⁿ(Ω(Y)). We show that the sequence
+(ℕ, X', f') is equivalent to (ℕ × 3, Y, g).
 
+PART 4:
+We get the long exact sequence of homotopy groups by taking the set-truncation of (Y, g).
 -/
 
 import .chain_complex algebra.homotopy_group
@@ -329,6 +363,32 @@ namespace chain_complex
     : pid_or_pinverse (n + 4) = !pequiv_pinverse ⬝e* loop_pequiv_loop (pid_or_pinverse (n + 1)) :=
   by reflexivity
 
+  definition pid_or_pinverse_add4_rev : Π(n : ℕ),
+    pid_or_pinverse (n + 4) ~* pinverse ∘* Ω→(pid_or_pinverse (n + 1))
+  | 0     := begin rewrite [pid_or_pinverse_add4, + to_pmap_pequiv_trans],
+                   replace pid_or_pinverse (0 + 1) with pequiv.refl X,
+                   rewrite [loop_pequiv_loop_rfl, ▸*], refine !pid_comp ⬝* _,
+                   exact !comp_pid⁻¹* ⬝* pwhisker_left _ !ap1_id⁻¹* end
+  | 1     := begin rewrite [pid_or_pinverse_add4, + to_pmap_pequiv_trans],
+                   replace pid_or_pinverse (1 + 1) with pequiv.refl (pfiber f),
+                   rewrite [loop_pequiv_loop_rfl, ▸*], refine !pid_comp ⬝* _,
+                   exact !comp_pid⁻¹* ⬝* pwhisker_left _ !ap1_id⁻¹* end
+  | 2     := begin rewrite [pid_or_pinverse_add4, + to_pmap_pequiv_trans],
+                   replace pid_or_pinverse (2 + 1) with pequiv.refl (Ω Y),
+                   rewrite [loop_pequiv_loop_rfl, ▸*], refine !pid_comp ⬝* _,
+                   exact !comp_pid⁻¹* ⬝* pwhisker_left _ !ap1_id⁻¹* end
+  | (k+3) :=
+    begin
+      replace (k + 3 + 1) with (k + 4),
+      rewrite [+ pid_or_pinverse_add4, + to_pmap_pequiv_trans],
+      refine _ ⬝* pwhisker_left _ !ap1_compose⁻¹*,
+      refine _ ⬝* !passoc,
+      apply pconcat2,
+      { refine ap1_phomotopy (pid_or_pinverse_add4_rev k) ⬝* _,
+        refine !ap1_compose ⬝* _, apply pwhisker_right, apply ap1_pinverse},
+      { refine !ap1_pinverse⁻¹*}
+    end
+
   theorem fiber_sequence_phomotopy_loop_spaces : Π(n : ℕ),
     fiber_sequence_pequiv_loop_spaces n ∘* fiber_sequence_fun n ~*
       (loop_spaces_fun n ∘* pid_or_pinverse (n + 1)) ∘* fiber_sequence_pequiv_loop_spaces (n + 1)
@@ -363,16 +423,89 @@ namespace chain_complex
       exact fiber_sequence_phomotopy_loop_spaces k
     end
 
-  definition LES_of_loop_spaces [constructor] : type_chain_complex +ℕ :=
+  definition pid_or_pinverse_right : Π(n : ℕ), loop_spaces n →* loop_spaces n
+  | 0     := !pid
+  | 1     := !pid
+  | 2     := !pid
+  | (k+3) := Ω→(pid_or_pinverse_right k) ∘* pinverse
+
+  definition pid_or_pinverse_left : Π(n : ℕ), loop_spaces n →* loop_spaces n
+  | 0     := pequiv.rfl
+  | 1     := pequiv.rfl
+  | 2     := pequiv.rfl
+  | 3     := pequiv.rfl
+  | 4     := pequiv.rfl
+  | (k+5) := Ω→(pid_or_pinverse_left (k+2)) ∘* pinverse
+
+  definition pid_or_pinverse_right_add3 (n : ℕ)
+    : pid_or_pinverse_right (n + 3) = Ω→(pid_or_pinverse_right n) ∘* pinverse :=
+  by reflexivity
+
+  definition pid_or_pinverse_left_add5 (n : ℕ)
+    : pid_or_pinverse_left (n + 5) = Ω→(pid_or_pinverse_left (n+2)) ∘* pinverse :=
+  by reflexivity
+
+  theorem pid_or_pinverse_commute_right : Π(n : ℕ),
+    loop_spaces_fun n ~* pid_or_pinverse_right n ∘* loop_spaces_fun n ∘* pid_or_pinverse (n + 1)
+  | 0     := proof !comp_pid⁻¹* ⬝* !pid_comp⁻¹* qed
+  | 1     := proof !comp_pid⁻¹* ⬝* !pid_comp⁻¹* qed
+  | 2     := proof !comp_pid⁻¹* ⬝* !pid_comp⁻¹* qed
+  | (k+3) :=
+    begin
+      replace (k + 3 + 1) with (k + 4),
+      rewrite [pid_or_pinverse_right_add3, loop_spaces_fun_add3],
+      refine _ ⬝* pwhisker_left _ (pwhisker_left _ !pid_or_pinverse_add4_rev⁻¹*),
+      refine ap1_phomotopy (pid_or_pinverse_commute_right k) ⬝* _,
+      refine !ap1_compose ⬝* _ ⬝* !passoc⁻¹*,
+      apply pwhisker_left,
+      refine !ap1_compose ⬝* _ ⬝* !passoc ⬝* !passoc,
+      apply pwhisker_right,
+      refine _ ⬝* pwhisker_right _ !ap1_compose_pinverse,
+      refine _ ⬝* !passoc⁻¹*,
+      refine !comp_pid⁻¹* ⬝* pwhisker_left _ _,
+      symmetry, apply pinverse_pinverse
+    end
+
+  theorem pid_or_pinverse_commute_left : Π(n : ℕ),
+    loop_spaces_fun n ∘* pid_or_pinverse_left (n + 1) ~* pid_or_pinverse n ∘* loop_spaces_fun n
+  | 0     := proof !comp_pid ⬝* !pid_comp⁻¹* qed
+  | 1     := proof !comp_pid ⬝* !pid_comp⁻¹* qed
+  | 2     := proof !comp_pid ⬝* !pid_comp⁻¹* qed
+  | 3     := proof !comp_pid ⬝* !pid_comp⁻¹* qed
+  | (k+4) :=
+    begin
+      replace (k + 4 + 1) with (k + 5),
+      rewrite [pid_or_pinverse_left_add5, pid_or_pinverse_add4, to_pmap_pequiv_trans],
+      replace (k + 4) with (k + 1 + 3),
+      rewrite [loop_spaces_fun_add3],
+      refine !passoc⁻¹* ⬝* _ ⬝* !passoc⁻¹*,
+      refine _ ⬝* pwhisker_left _ !ap1_compose_pinverse,
+      refine _ ⬝* !passoc,
+      apply pwhisker_right,
+      refine !ap1_compose⁻¹* ⬝* _ ⬝* !ap1_compose,
+      exact ap1_phomotopy (pid_or_pinverse_commute_left (k+1))
+    end
+
+  definition LES_of_loop_spaces' [constructor] : type_chain_complex +ℕ :=
   transfer_type_chain_complex
     fiber_sequence
-    loop_spaces_fun
+    (λn, loop_spaces_fun n ∘* pid_or_pinverse (n + 1))
     fiber_sequence_pequiv_loop_spaces
-    sorry --(fiber_sequence_phomotopy_loop_spaces)
+    fiber_sequence_phomotopy_loop_spaces
+
+  definition LES_of_loop_spaces [constructor] : type_chain_complex +ℕ :=
+  type_chain_complex_cancel_aut
+    LES_of_loop_spaces'
+    loop_spaces_fun
+    pid_or_pinverse
+    pid_or_pinverse_right
+    (λn x, idp)
+    pid_or_pinverse_commute_right
 
   definition is_exact_LES_of_loop_spaces : is_exact_t LES_of_loop_spaces :=
   begin
     intro n,
+    refine is_exact_at_t_cancel_aut n pid_or_pinverse_left _ _ pid_or_pinverse_commute_left _,
     apply is_exact_at_t_transfer,
     apply is_exact_fiber_sequence
   end
