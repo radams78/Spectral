@@ -20,13 +20,13 @@ open sigma
 
 namespace group
   open is_trunc
-  definition pSet_of_Group (G : Group) : Set* := ptrunctype.mk G _ 1
+  definition pSet_of_Group {i : signature} (G : Group i) : Set* := ptrunctype.mk G _ 1
 
-  definition pmap_of_isomorphism [constructor] {G₁ G₂ : Group} (φ : G₁ ≃g G₂) :
-    pType_of_Group G₁ →* pType_of_Group G₂ :=
+  definition pmap_of_isomorphism [constructor] {i j : signature} {G₁ : Group i} {G₂ : Group j}
+    (φ : G₁ ≃g G₂) : pType_of_Group G₁ →* pType_of_Group G₂ :=
   pequiv_of_isomorphism φ
 
-  definition pequiv_of_isomorphism_of_eq {G₁ G₂ : Group} (p : G₁ = G₂) :
+  definition pequiv_of_isomorphism_of_eq {i : signature} {G₁ G₂ : Group i} (p : G₁ = G₂) :
     pequiv_of_isomorphism (isomorphism_of_eq p) = pequiv_of_eq (ap pType_of_Group p) :=
   begin
     induction p,
@@ -36,8 +36,8 @@ namespace group
     { apply is_prop.elim}
   end
 
-  definition homomorphism_change_fun [constructor] {G₁ G₂ : Group} (φ : G₁ →g G₂) (f : G₁ → G₂)
-    (p : φ ~ f) : G₁ →g G₂ :=
+  definition homomorphism_change_fun [constructor] {i j : signature} {G₁ : Group i} {G₂ : Group j}
+    (φ : G₁ →g G₂) (f : G₁ → G₂) (p : φ ~ f) : G₁ →g G₂ :=
   homomorphism.mk f (λg h, (p (g * h))⁻¹ ⬝ to_respect_mul φ g h ⬝ ap011 mul (p g) (p h))
 
 end group open group
