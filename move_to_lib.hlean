@@ -156,6 +156,28 @@ namespace pointed
   definition ap1_pconst (A B : Type*) : Ω→(pconst A B) ~* pconst (Ω A) (Ω B) :=
     phomotopy.mk (λp, idp_con _ ⬝ ap_constant p pt) rfl
 
+  definition loop_ppi_commute {A : Type} (B : A → Type*) : Ω(ppi B) ≃* Π*a, Ω (B a) :=
+    pequiv_of_equiv eq_equiv_homotopy rfl
+
+  definition equiv_ppi_right {A : Type} {P Q : A → Type*} (g : Πa, P a ≃* Q a)
+    : (Π*a, P a) ≃* (Π*a, Q a) :=
+    pequiv_of_equiv (pi_equiv_pi_right g)
+      begin esimp, apply eq_of_homotopy, intros a, esimp, exact (respect_pt (g a)) end
+
+  definition pcast_commute [constructor] {A : Type} {B C : A → Type*} (f : Πa, B a →* C a)
+    {a₁ a₂ : A} (p : a₁ = a₂) : pcast (ap C p) ∘* f a₁ ~* f a₂ ∘* pcast (ap B p) :=
+  phomotopy.mk
+    begin induction p, reflexivity end
+    begin induction p, esimp, refine !idp_con ⬝ !idp_con ⬝ !ap_id⁻¹ end
+
+  definition pequiv_of_eq_commute [constructor] {A : Type} {B C : A → Type*} (f : Πa, B a →* C a)
+    {a₁ a₂ : A} (p : a₁ = a₂) : pequiv_of_eq (ap C p) ∘* f a₁ ~* f a₂ ∘* pequiv_of_eq (ap B p) :=
+  pcast_commute f p
+
+end pointed
+
+namespace fiber
+
   definition pfiber_loop_space {A B : Type*} (f : A →* B) : pfiber (Ω→ f) ≃* Ω (pfiber f) :=
     pequiv_of_equiv
     (calc pfiber (Ω→ f) ≃ Σ(p : Point A = Point A), ap1 f p = rfl                                : (fiber.sigma_char (ap1 f) (Point (Ω B)))
@@ -206,25 +228,7 @@ namespace pointed
               ... ≃* pfiber (g ∘* h) : pfiber_equiv_of_phomotopy s
               ... ≃* pfiber g : pequiv_precompose
 
-  definition loop_ppi_commute {A : Type} (B : A → Type*) : Ω(ppi B) ≃* Π*a, Ω (B a) :=
-    pequiv_of_equiv eq_equiv_homotopy rfl
-
-  definition equiv_ppi_right {A : Type} {P Q : A → Type*} (g : Πa, P a ≃* Q a)
-    : (Π*a, P a) ≃* (Π*a, Q a) :=
-    pequiv_of_equiv (pi_equiv_pi_right g)
-      begin esimp, apply eq_of_homotopy, intros a, esimp, exact (respect_pt (g a)) end
-
-  definition pcast_commute [constructor] {A : Type} {B C : A → Type*} (f : Πa, B a →* C a)
-    {a₁ a₂ : A} (p : a₁ = a₂) : pcast (ap C p) ∘* f a₁ ~* f a₂ ∘* pcast (ap B p) :=
-  phomotopy.mk
-    begin induction p, reflexivity end
-    begin induction p, esimp, refine !idp_con ⬝ !idp_con ⬝ !ap_id⁻¹ end
-
-  definition pequiv_of_eq_commute [constructor] {A : Type} {B C : A → Type*} (f : Πa, B a →* C a)
-    {a₁ a₂ : A} (p : a₁ = a₂) : pequiv_of_eq (ap C p) ∘* f a₁ ~* f a₂ ∘* pequiv_of_eq (ap B p) :=
-  pcast_commute f p
-
-end pointed
+end fiber
 
 namespace eq --algebra.homotopy_group
 
