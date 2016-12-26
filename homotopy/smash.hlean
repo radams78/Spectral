@@ -1,10 +1,10 @@
 -- Authors: Floris van Doorn
 
-import homotopy.smash
+import homotopy.smash ..move_to_lib
 
 open bool pointed eq equiv is_equiv sum bool prod unit circle cofiber prod.ops wedge
 
-  /- smash A (susp B) = susp (smash A B) <- this follows from associativity and smash with S¹-/
+  /- smash A (susp B) = susp (smash A B) <- this follows from associativity and smash with S¹ -/
 
   /- To prove: Σ(X × Y) ≃ ΣX ∨ ΣY ∨ Σ(X ∧ Y) (notation means suspension, wedge, smash),
      and both are equivalent to the reduced join -/
@@ -76,8 +76,17 @@ namespace smash
   begin
     induction x with x x,
     { refine (pushout.glue pt)⁻¹ },
-    { exact sorry },
-    { exact sorry }
+    { induction x with a b, reflexivity },
+    { apply eq_pathover_id_right, esimp,
+      refine ap_compose' pcofiber_of_smash smash_of_pcofiber (cofiber.glue x) ⬝ph _,
+      refine ap02 _ !cofiber.elim_glue' ⬝ph _,
+      induction x,
+      { esimp, refine (!ap_con ⬝ !elim_gluel ◾ (!ap_inv ⬝ !elim_gluel⁻² ⬝ !inv_inv)) ⬝ph _,
+        apply whisker_tl, apply hrfl },
+      { esimp, refine (!ap_con ⬝ !elim_gluer ◾ (!ap_inv ⬝ !elim_gluer⁻² ⬝ !inv_inv)) ⬝ph _,
+        apply square_of_eq, esimp, apply whisker_right, apply inverse2,
+        esimp, esimp, unfold [pwedge], esimp [pushout.pointed_pushout], exact sorry },
+      { exact sorry }}
   end
 
   definition smash_of_pcofiber_of_smash (x : smash A B) :
@@ -98,7 +107,7 @@ namespace smash
   end
 
   variables (A B)
-  definition smash_pequiv_pcofiber : smash A B ≃* pcofiber (pprod_of_pwedge A B) :=
+  definition smash_pequiv_pcofiber [constructor] : smash A B ≃* pcofiber (pprod_of_pwedge A B) :=
   begin
     fapply pequiv_of_equiv,
     { fapply equiv.MK,
