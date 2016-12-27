@@ -150,6 +150,14 @@ namespace trunc
     { reflexivity }
   end
 
+  definition ptrunc_elim_pcompose (n : ℕ₋₂) {A B C : Type*} (g : B →* C) (f : A →* B) [is_trunc n B]
+    [is_trunc n C] : ptrunc.elim n (g ∘* f) ~* g ∘* ptrunc.elim n f :=
+  begin
+    fapply phomotopy.mk,
+    { intro a, induction a with a, reflexivity },
+    { apply idp_con }
+  end
+
 end trunc
 
 namespace is_equiv
@@ -342,6 +350,32 @@ end pi open pi
 
 namespace eq
 
+  infix ` ⬝hty `:75 := homotopy.trans
+  postfix `⁻¹ʰᵗʸ`:(max+1) := homotopy.symm
+
+  definition hassoc {A B C D : Type} (h : C → D) (g : B → C) (f : A → B) : (h ∘ g) ∘ f ~ h ∘ (g ∘ f) :=
+  λa, idp
+
+  -- to algebra.homotopy_group
+  definition homotopy_group_homomorphism_pcompose (n : ℕ) [H : is_succ n] {A B C : Type*} (g : B →* C)
+    (f : A →* B) : π→g[n] (g ∘* f) ~ π→g[n] g ∘ π→g[n] f :=
+  begin
+    induction H with n, exact to_homotopy (homotopy_group_functor_compose (succ n) g f)
+  end
+
+  definition apn_pinv (n : ℕ) {A B : Type*} (f : A ≃* B) :
+    Ω→[n] f⁻¹ᵉ* ~* (loopn_pequiv_loopn n f)⁻¹ᵉ* :=
+  begin
+    refine !to_pinv_pequiv_MK2⁻¹*
+  end
+
+  -- definition homotopy_group_homomorphism_pinv (n : ℕ) {A B : Type*} (f : A ≃* B) :
+  --   π→g[n+1] f⁻¹ᵉ* ~ (homotopy_group_isomorphism_of_pequiv n f)⁻¹ᵍ :=
+  -- begin
+  --   -- refine ptrunc_functor_phomotopy 0 !apn_pinv ⬝hty _,
+  --   -- intro x, esimp,
+  -- end
+
   -- definition natural_square_tr_eq {A B : Type} {a a' : A} {f g : A → B}
   --   (p : f ~ g) (q : a = a') : natural_square p q = square_of_pathover (apd p q) :=
   -- idp
@@ -421,6 +455,23 @@ namespace susp
         refine !elim_merid ⬝ _ ⬝ (ap_compose (psusp_functor g) _ _)⁻¹ᵖ,
         refine _ ⬝ ap02 _ !elim_merid⁻¹, exact !elim_merid⁻¹ }},
     { reflexivity },
+  end
+
+  definition psusp_elim_psusp_functor {A B C : Type*} (g : B →* Ω C) (f : A →* B) :
+    psusp.elim g ∘* psusp_functor f ~* psusp.elim (g ∘* f) :=
+  begin
+    refine !passoc ⬝* _, exact pwhisker_left _ !psusp_functor_pcompose⁻¹*
+  end
+
+  definition psusp_elim_phomotopy {A B : Type*} {f g : A →* Ω B} (p : f ~* g) : psusp.elim f ~* psusp.elim g :=
+  pwhisker_left _ (psusp_functor_phomotopy p)
+
+  definition psusp_elim_natural {X Y Z : Type*} (g : Y →* Z) (f : X →* Ω Y)
+    : g ∘* psusp.elim f ~* psusp.elim (Ω→ g ∘* f) :=
+  begin
+    refine _ ⬝* pwhisker_left _ !psusp_functor_pcompose⁻¹*,
+    refine !passoc⁻¹* ⬝* _ ⬝* !passoc,
+    exact pwhisker_right _ !loop_psusp_counit_natural
   end
 
 end susp
