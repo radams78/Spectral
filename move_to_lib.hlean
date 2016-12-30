@@ -29,6 +29,9 @@ namespace cofiber
 end cofiber
 namespace pointed
 
+  definition to_fun_pequiv_trans {X Y Z : Type*} (f : X ≃* Y) (g :Y ≃* Z) : f ⬝e* g ~ g ∘ f :=
+  λx, idp
+
   definition pcompose2' {A B C : Type*} {g g' : B →* C} {f f' : A →* B} (q : g ~* g') (p : f ~* f') :
     g ∘* f ~* g' ∘* f' :=
   pwhisker_right f q ⬝* pwhisker_left g' p
@@ -558,8 +561,6 @@ namespace category
     { intro v, repeat induction v with x v, reflexivity },
   end
   open is_trunc
---print equiv_of_is_prop,
-  --set_option pp.notation false
 
   section
   local attribute group.to_has_mul group.to_has_inv [coercion]
@@ -662,8 +663,8 @@ namespace category
   definition Group_eq_equiv_Group_iso (G₁ G₂ : Group) : G₁ = G₂ ≃ G₁ ≅ G₂ :=
   Group_eq_equiv G₁ G₂ ⬝e (Group_iso_equiv G₁ G₂)⁻¹ᵉ
 
-  definition category_Group : category Group :=
-  category.mk precategory_group
+  definition category_Group.{u} : category Group.{u} :=
+  category.mk precategory_Group
   begin
     intro G H,
     apply is_equiv_of_equiv_of_homotopy (Group_eq_equiv_Group_iso G H),
@@ -673,7 +674,7 @@ namespace category
   definition category_AbGroup : category AbGroup :=
   category.mk precategory_AbGroup sorry
 
-  definition Grp [constructor] : Category := category.Mk Group category_Group
+  definition Grp.{u} [constructor] : Category := category.Mk Group.{u} category_Group
   definition AbGrp [constructor] : Category := category.Mk AbGroup category_AbGroup
 
 end category

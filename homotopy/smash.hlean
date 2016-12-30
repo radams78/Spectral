@@ -85,7 +85,7 @@ namespace smash
         apply whisker_tl, apply hrfl },
       { esimp, refine (!ap_con ⬝ !elim_gluer ◾ (!ap_inv ⬝ !elim_gluer⁻² ⬝ !inv_inv)) ⬝ph _,
         apply square_of_eq, esimp, apply whisker_right, apply inverse2,
-        esimp, esimp, unfold [pwedge], esimp [pushout.pointed_pushout], exact sorry },
+        esimp, esimp, exact sorry },
       { exact sorry }}
   end
 
@@ -115,7 +115,7 @@ namespace smash
       { apply smash_of_pcofiber },
       { exact pcofiber_of_smash_of_pcofiber },
       { exact smash_of_pcofiber_of_smash }},
-    { esimp, symmetry, apply pushout.glue pt }
+    { symmetry, exact pushout.glue (Point (pwedge A B)) }
   end
 
   variables {A B}
