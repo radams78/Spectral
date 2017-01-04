@@ -27,6 +27,14 @@ namespace cofiber
   !pushout.elim_glue
 
 end cofiber
+
+namespace wedge
+  open pushout unit
+  protected definition glue (A B : Type*) : inl pt = inr pt :> wedge A B :=
+  pushout.glue ⋆
+
+end wedge
+
 namespace pointed
 
   definition to_fun_pequiv_trans {X Y Z : Type*} (f : X ≃* Y) (g :Y ≃* Z) : f ⬝e* g ~ g ∘ f :=
@@ -400,6 +408,46 @@ namespace fiber
   sorry
 
 end fiber
+
+namespace is_conn
+
+  open unit trunc_index nat is_trunc pointed.ops
+
+  definition is_contr_of_trivial_homotopy' (n : ℕ₋₂) (A : Type) [is_trunc n A] [is_conn -1 A]
+    (H : Πk a, is_contr (π[k] (pointed.MK A a))) : is_contr A :=
+  begin
+    assert aa : trunc -1 A,
+    { apply center },
+    assert H3 : is_conn 0 A,
+    { induction aa with a, exact H 0 a },
+    exact is_contr_of_trivial_homotopy n A H
+  end
+
+  -- don't make is_prop_is_trunc an instance
+  definition is_trunc_succ_is_trunc [instance] (n m : ℕ₋₂) (A : Type) : is_trunc (n.+1) (is_trunc m A) :=
+  is_trunc_of_le _ !minus_one_le_succ
+
+  definition is_conn_of_trivial_homotopy (n : ℕ₋₂) (m : ℕ) (A : Type) [is_trunc n A] [is_conn 0 A]
+    (H : Π(k : ℕ) a, k ≤ m → is_contr (π[k] (pointed.MK A a))) : is_conn m A :=
+  begin
+    apply is_contr_of_trivial_homotopy_nat m (trunc m A),
+    intro k a H2,
+    induction a with a,
+    apply is_trunc_equiv_closed_rev,
+      exact equiv_of_pequiv (homotopy_group_trunc_of_le (pointed.MK A a) _ _ H2),
+    exact H k a H2
+  end
+
+  definition is_conn_of_trivial_homotopy_pointed (n : ℕ₋₂) (m : ℕ) (A : Type*) [is_trunc n A]
+    (H : Π(k : ℕ), k ≤ m → is_contr (π[k] A)) : is_conn m A :=
+  begin
+    have is_conn 0 A, proof H 0 !zero_le qed,
+    apply is_conn_of_trivial_homotopy n m A,
+    intro k a H2, revert a, apply is_conn.elim -1,
+    cases A with A a, exact H k H2
+  end
+
+end is_conn
 
 namespace circle
 

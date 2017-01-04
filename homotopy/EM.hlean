@@ -202,7 +202,7 @@ namespace EM
       (ghomotopy_group_EMadd1' H n)⁻¹ᵍ ∘ π→g[n+1] (EMadd1_functor φ n) :=
   htyhinverse (homotopy_group_functor_EMadd1_functor φ n)
 
-  definition EM1_pmap_natural {G H : AbGroup} {X Y : Type*} (f : X →* Y) (eX : G → Ω X)
+  definition EM1_pmap_natural {G H : Group} {X Y : Type*} (f : X →* Y) (eX : G → Ω X)
     (eY : H → Ω Y) (rX : Πg h, eX (g * h) = eX g ⬝ eX h) (rY : Πg h, eY (g * h) = eY g ⬝ eY h)
     [H1 : is_conn 0 X] [H2 : is_trunc 1 X] [is_conn 0 Y] [is_trunc 1 Y]
     (φ : G →g H) (p : Ω→ f ∘ eX ~ eY ∘ φ) :
@@ -217,6 +217,29 @@ namespace EM
         refine _ ⬝hp !elim_pth⁻¹, apply transpose, exact square_of_eq_bot (p g) }},
     { exact !idp_con⁻¹ }
   end
+
+  definition EM1_pequiv'_natural {G H : Group} {X Y : Type*} (f : X →* Y) (eX : G ≃* Ω X)
+    (eY : H ≃* Ω Y) (rX : Πg h, eX (g * h) = eX g ⬝ eX h)  (rY : Πg h, eY (g * h) = eY g ⬝ eY h)
+    [H1 : is_conn 0 X] [H2 : is_trunc 1 X] [is_conn 0 Y] [is_trunc 1 Y]
+    (φ : G →g H) (p : Ω→ f ∘ eX ~ eY ∘ φ) :
+    f ∘* EM1_pequiv' eX rX ~* EM1_pequiv' eY rY ∘* EM1_functor φ :=
+  EM1_pmap_natural f eX eY rX rY φ p
+
+  definition EM1_pequiv_natural {G H : Group} {X Y : Type*} (f : X →* Y) (eX : G ≃g π₁ X)
+    (eY : H ≃g π₁ Y) [H1 : is_conn 0 X] [H2 : is_trunc 1 X] [is_conn 0 Y] [is_trunc 1 Y]
+    (φ : G →g H) (p : π→g[1] f ∘ eX ~ eY ∘ φ) :
+    f ∘* EM1_pequiv eX ~* EM1_pequiv eY ∘* EM1_functor φ :=
+  EM1_pequiv'_natural f _ _ _ _ φ
+    begin
+      assert p' : ptrunc_functor 0 (Ω→ f) ∘* pequiv_of_isomorphism eX ~*
+                  pequiv_of_isomorphism eY ∘* pmap_of_homomorphism φ, exact phomotopy_of_homotopy p,
+      exact phcompose p' (ptrunc_pequiv_natural 0 (Ω→ f)),
+    end
+
+  definition EM1_pequiv_type_natural {X Y : Type*} (f : X →* Y) [H1 : is_conn 0 X] [H2 : is_trunc 1 X]
+    [H3 : is_conn 0 Y] [H4 : is_trunc 1 Y] :
+    f ∘* EM1_pequiv_type X ~* EM1_pequiv_type Y ∘* EM1_functor (π→g[1] f) :=
+  begin refine EM1_pequiv_natural f _ _ _ _, reflexivity end
 
   definition EM_up_natural {G H : AbGroup} (φ : G →g H) {X Y : Type*} (f : X →* Y) {n : ℕ}
     (eX : Ω[succ (succ n)] X ≃* G) (eY : Ω[succ (succ n)] Y ≃* H) (p : φ ∘ eX ~ eY ∘ Ω→[succ (succ n)] f)
@@ -248,7 +271,7 @@ namespace EM
     (eY : Ω[succ n] Y ≃* H) (rX : Πp q, eX (p ⬝ q) = eX p * eX q) (rY : Πp q, eY (p ⬝ q) = eY p * eY q)
     [H1 : is_conn n X] [H2 : is_trunc (n.+1) X] [is_conn n Y] [is_trunc (n.+1) Y]
     (φ : G →g H) (p : φ ∘ eX ~ eY ∘ Ω→[succ n] f) :
-    f ∘* EMadd1_pequiv' n eX rX ~* EMadd1_pequiv' n eY rY ∘* EMadd1_functor φ n :=
+     f ∘* EMadd1_pequiv' n eX rX ~* EMadd1_pequiv' n eY rY ∘* EMadd1_functor φ n :=
   begin rexact EMadd1_pmap_natural f n eX eY rX rY φ p end
 
   definition EMadd1_pequiv_natural_local_instance {X : Type*} (n : ℕ) [H : is_trunc (n.+1) X] :
@@ -263,7 +286,7 @@ namespace EM
   EMadd1_pequiv'_natural f n
     ((ptrunc_pequiv 0 (Ω[succ n] X))⁻¹ᵉ* ⬝e* pequiv_of_isomorphism eX)
     ((ptrunc_pequiv 0 (Ω[succ n] Y))⁻¹ᵉ* ⬝e* pequiv_of_isomorphism eY)
-    _ _ φ (htyhcompose (to_homotopy ( phinverse (ptrunc_pequiv_natural 0 (Ω→[succ n] f)))) p)
+    _ _ φ (htyhcompose (to_homotopy (phinverse (ptrunc_pequiv_natural 0 (Ω→[succ n] f)))) p)
 
   definition EMadd1_pequiv_succ_natural {G H : AbGroup} {X Y : Type*} (f : X →* Y) (n : ℕ)
     (eX : πag[n+2] X ≃g G) (eY : πag[n+2] Y ≃g H) [is_conn (n.+1) X] [is_trunc (n.+2) X]
@@ -275,7 +298,7 @@ namespace EM
     [H1 : is_conn (n+1) X] [H2 : is_trunc (n+1+1) X] [H3 : is_conn (n+1) Y] [H4 : is_trunc (n+1+1) Y] :
     f ∘* EMadd1_pequiv_type X n ~* EMadd1_pequiv_type Y n ∘* EMadd1_functor (π→g[n+2] f) (succ n) :=
   EMadd1_pequiv_succ_natural f n !isomorphism.refl !isomorphism.refl (π→g[n+2] f)
-  proof λa, idp qed
+    proof λa, idp qed
 
   definition EM1_functor_equiv' (X Y : Type*) [H1 : is_conn 0 X] [H2 : is_trunc 1 X]
     [H3 : is_conn 0 Y] [H4 : is_trunc 1 Y] : (X →* Y) ≃ (π₁ X →g π₁ Y) :=
@@ -286,7 +309,7 @@ namespace EM
     { intro φ, apply homomorphism_eq,
       refine homotopy_group_homomorphism_pcompose _ _ _ ⬝hty _,
       refine hwhisker_left _ (homotopy_group_homomorphism_pcompose _ _ _) ⬝hty _,
-      intro g, exact sorry },
+      refine (hassoc _ _ _)⁻¹ʰᵗʸ ⬝hty _, exact sorry },
     { intro f, apply eq_of_phomotopy, refine !passoc⁻¹* ⬝* _, apply pinv_right_phomotopy_of_phomotopy,
       exact sorry }
   end
@@ -448,7 +471,7 @@ namespace EM
     { fapply natural_iso.mk,
       { fapply nat_trans.mk,
         { intro X, exact EM1_pequiv_ptruncconntype' X },
-        { intro X Y f, apply eq_of_phomotopy, exact sorry }},
+        { intro X Y f, apply eq_of_phomotopy, apply EM1_pequiv_type_natural }},
       { intro X, fapply iso.is_iso.mk,
         { exact (EM1_pequiv_ptruncconntype' X)⁻¹ᵉ* },
         { apply eq_of_phomotopy, apply pleft_inv },
